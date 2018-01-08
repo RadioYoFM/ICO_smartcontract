@@ -7,6 +7,8 @@ This repository contains the token contract for RAO token.
 ```
 npm install -g truffle
 
+npm install
+
 ```
 
 + Compile the code
