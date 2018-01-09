@@ -83,7 +83,7 @@ contract RAOToken is Ownable, ERC20 {
     uint256 public decimals = 18;
     uint256 public numberDecimal18 = 1000000000000000000;
 
-    uint256 public initialPrice = 3000;
+    uint256 public initialPrice = 3000e18;
     uint256 public _totalSupply = 33000000e18;
     uint256 public _icoSupply = 33000000e18;
     uint256 public _softcap = 165000e18;
@@ -105,7 +105,7 @@ contract RAOToken is Ownable, ERC20 {
     // Wallet Address of Token
     address public multisig;
 
-    // how many token units a buyer gets per wei
+    // how many token units a buyer get in base unit 
     uint256 public RATE;
 
     uint256 public minContribAmount = 0.01 ether;
@@ -185,8 +185,7 @@ contract RAOToken is Ownable, ERC20 {
         require(recipient != 0x0);
         
         uint256 weiAmount = msg.value;
-        uint256 nbTokens = weiAmount.mul(RATE).div(1 ether);
-        uint256 numberRaoToken = nbTokens.mul(numberDecimal18);
+        uint256 numberRaoToken = weiAmount.mul(RATE).div(1 ether);
         
         require(_icoSupply >= numberRaoToken);   
                 
@@ -410,7 +409,4 @@ contract RAOToken is Ownable, ERC20 {
         return (name, symbol, startTime, endTime, _totalSupply, _icoSupply, totalNumberTokenSold);
     }
 
-    function setPrice(uint256 _tokenPrice) public onlyOwner {
-        RATE = _tokenPrice;
-    }
 }
