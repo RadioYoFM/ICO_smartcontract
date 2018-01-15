@@ -1,6 +1,6 @@
 # Radio Yo Token
 
-This repository contains the token contract for RAO token.
+This repository contains the token smart contract for RAO token from RadioYo.  RadioYo is a platform for people to livestream free online radio shows and broadcast prerecorded podcast episodes.  The URL is https://radioyo.fm.  We plan to add podcaster ownership information directly onto the blockchain while upgrading our platform into a blockchain-based broadcasting and services platform for podcasters, online broadcasters, independent media, and online publishers worldwide.
 
 ## HOW TO
 
