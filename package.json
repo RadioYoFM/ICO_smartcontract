@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/girishramnani/ICO_smartcontract.git"
+    "url": "git+https://github.com/RadioYoFM/ICO_smartcontract.git"
   },
   "author": "girishramnani95@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/girishramnani/ICO_smartcontract/issues"
+    "url": "https://github.com/RadioYoFM/ICO_smartcontract/issues"
   },
-  "homepage": "https://github.com/girishramnani/ICO_smartcontract#readme",
+  "homepage": "https://github.com/RadioYoFM/ICO_smartcontract#readme",
   "dependencies": {
     "truffle-hdwallet-provider": "0.0.3"
   }
