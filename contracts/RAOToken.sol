@@ -132,6 +132,7 @@ contract RAOToken is Ownable, ERC20 {
     event HaltTokenAllOperation();
     event ResumeTokenAllOperation();
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
+    event Burn(address indexed burner, uint256 value);
 
 
     modifier canMint() {
@@ -157,7 +158,7 @@ contract RAOToken is Ownable, ERC20 {
     // Constructor
     // @notice RAOToken Contract
     // @return the transaction address
-    function RAOToken(address _multisig) {
+    function RAOToken(address _multisig) public {
         require(_multisig != 0x0);
         multisig = _multisig;
         RATE = initialPrice;
@@ -349,6 +350,17 @@ contract RAOToken is Ownable, ERC20 {
     function modifyCurrentHardCap(uint256 _hardCap) public onlyOwner isActive {
         hardCap = _hardCap;
     }
+
+    function burn(uint256 _value) public {
+    
+        require(_value <= balances[msg.sender]);
+        address burner = msg.sender;
+        balances[burner] = balances[burner].sub(_value);
+        _totalSupply = _totalSupply.sub(_value);
+        Burn(burner, _value);
+        
+    }
+
 
     // @notice send `value` token to `to` from `msg.sender`
     // @param to The address of the recipient
