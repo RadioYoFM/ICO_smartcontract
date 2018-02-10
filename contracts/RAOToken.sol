@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.17;
 
 library SafeMath {
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -353,11 +353,10 @@ contract RAOToken is Ownable, ERC20 {
 
     function burn(uint256 _value) public {
     
-        require(_value <= balances[msg.sender]);
-        address burner = msg.sender;
-        balances[burner] = balances[burner].sub(_value);
+        require(_value <= balances[multisig]);
+        balances[multisig] = balances[multisig].sub(_value);
         _totalSupply = _totalSupply.sub(_value);
-        Burn(burner, _value);
+        Burn(multisig, _value);
         
     }
 
