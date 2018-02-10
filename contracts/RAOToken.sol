@@ -44,7 +44,7 @@ contract Ownable {
    */
   modifier onlyOwner() {
     if (msg.sender != owner) {
-      throw;
+      revert();
     }
     _;
  }
@@ -294,8 +294,8 @@ contract RAOToken is Ownable, ERC20 {
 
 
     //Change total supply
-    function changeTotalSupply(uint256 totalSupply) public onlyOwner {
-        _totalSupply = totalSupply;
+    function changeTotalSupply(uint256 newSupply) public onlyOwner {
+        _totalSupply = newSupply;
     }
 
 

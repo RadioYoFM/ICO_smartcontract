@@ -17,6 +17,13 @@ npm install
 truffle compile
 ```
 
++ Running the tests
+
+```
+truffle test
+```
+
+
 + We have added a test account and a `hdwalletProvider` to connect to `rinkeby` using infura. So you can just call
 
 ```

@@ -16,7 +16,7 @@ contract TestRAOToken {
 
     function testOwnerBalance() public {
         RAOToken rao = new RAOToken(msg.sender);
-        Assert.equal(rao.balanceOf(msg.sender),rao.totalSupply(),"The owner should have all the tokens initially");
+        Assert.equal(rao.balanceOf(msg.sender),rao.totalSupply(),"The multisig should have all the balance");
 
     }
 
@@ -30,7 +30,8 @@ contract TestRAOToken {
     function testBurnAll() public {
         RAOToken rao = new RAOToken(msg.sender);
         rao.burn(rao.totalSupply());
-        Assert.equal(rao.totalSupply(),0,"The owner should have all the tokens initially");
+        Assert.equal(rao.totalSupply(),0,"The supply should become 0");
+        Assert.equal(rao.balanceOf(msg.sender),0,"The multisig balance should be 0");
     }
 
 }
