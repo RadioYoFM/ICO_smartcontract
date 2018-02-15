@@ -90,6 +90,9 @@ contract RAOToken is Ownable, ERC20 {
 
     // Balances for each account
     mapping (address => uint256) balances;
+
+    // time seal for upper management
+    mapping (address => uint256) vault;
     
     
     //Balances for waiting KYC approving
@@ -99,8 +102,9 @@ contract RAOToken is Ownable, ERC20 {
     mapping (address => mapping(address => uint256)) allowed;
     
     // start and end timestamps where investments are allowed (both inclusive)
-    uint256 public startTime = 1507334400; 
-    uint256 public endTime = 1514764799; 
+    uint256 public startTime; 
+    uint256 public endTime; 
+    uint256 public sealdate;
 
     // Wallet Address of Token
     address public multisig;
@@ -162,7 +166,13 @@ contract RAOToken is Ownable, ERC20 {
         require(_multisig != 0x0);
         multisig = _multisig;
         RATE = initialPrice;
+        startTime = now;
 
+        // the balances will be sealed for 6 months
+        sealdate = startTime + 180 days;
+
+        // for now the token sale will run for 30 days
+        endTime = startTime + 30 days;
         balances[multisig] = _totalSupply;
 
         owner = msg.sender;
@@ -257,6 +267,8 @@ contract RAOToken is Ownable, ERC20 {
         MintFinished();
     }
 
+
+
     // Start or pause tradable to Transfer token
     function startTradable(bool _tradable) public onlyOwner isActive {
         tradable = _tradable;
@@ -306,6 +318,23 @@ contract RAOToken is Ownable, ERC20 {
         return balances[who];
     }
 
+
+    function vaultBalanceOf(address who) public constant returns (uint256) {
+        return vault[who];
+    }
+
+    function transferToVault(address recipient, uint256 amount) public onlyOwner isActive {
+        require (
+            balances[multisig] >= amount && amount > 0
+        );
+
+        balances[multisig] = balances[multisig].sub(amount);
+        // sending tokens to vault is not part of ICO, its a decision made by the owner
+        // _icoSupply = _icoSupply.sub(amount);
+        vault[recipient] = vault[recipient].add(amount);
+
+    }
+
     // What is the balance of a particular account?
     // @param who The address of the particular account
     // @return the balance of KYC waiting to be approved
@@ -325,34 +354,41 @@ contract RAOToken is Ownable, ERC20 {
         }
     }
 
-    function addBonusForOneHolder(address holder, uint256 bonusToken) public onlyOwner {
-         require(holder != 0x0); 
-         balances[multisig] = balances[multisig].sub(bonusToken);
-         balances[holder] = balances[holder].add(bonusToken);
-         totalNumberTokenSold = totalNumberTokenSold.add(bonusToken);
-         _icoSupply = _icoSupply.sub(bonusToken);
+    function remit() public {
+        require(vault[msg.sender] > 0 && now >= sealdate);
+        balances[msg.sender] = balances[msg.sender].add(vault[msg.sender]);
+        vault[msg.sender] = 0;
     }
 
-    
-    function addBonusForMultipleHolders(address[] listAddresses, uint256[] bonus) public onlyOwner {
-        require(listAddresses.length == bonus.length); 
-         for (uint256 i = 0; i < listAddresses.length; i++) {
-                require(listAddresses[i] != 0x0); 
-                balances[listAddresses[i]] = balances[listAddresses[i]].add(bonus[i]);
-                balances[multisig] = balances[multisig].sub(bonus[i]);
-                totalNumberTokenSold = totalNumberTokenSold.add(bonus[i]);
-                _icoSupply = _icoSupply.sub(bonus[i]);
-         }
+    function remitFor(address person) public onlyOwner {
+        require(vault[person] > 0 && now >= sealdate);
+        balances[person] = balances[person].add(vault[person]);
+        vault[person] = 0;
     }
-    
-   
+
+    function addTimeToSeal(uint256 time) public onlyOwner {
+        sealdate = sealdate.add(time);
+    }
+
+    function setSealDate(uint256 _sealdate) public onlyOwner {
+        sealdate = _sealdate;
+    } 
+
+    function resetTimeSeal() public onlyOwner {
+        sealdate = now;
+    }
+
+    function getSealDate() public constant returns (uint256) {
+        return sealdate;
+    }
+
     
     function modifyCurrentHardCap(uint256 _hardCap) public onlyOwner isActive {
         hardCap = _hardCap;
     }
 
+
     function burn(uint256 _value) public {
-    
         require(_value <= balances[multisig]);
         balances[multisig] = balances[multisig].sub(_value);
         _totalSupply = _totalSupply.sub(_value);

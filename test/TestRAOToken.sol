@@ -34,4 +34,25 @@ contract TestRAOToken {
         Assert.equal(rao.balanceOf(msg.sender),0,"The multisig balance should be 0");
     }
 
+    function testTimeSealBalanceOf() public {
+        RAOToken rao = new RAOToken(proxyOwnerAddress);
+        rao.transferToVault(msg.sender,5000);
+        Assert.equal(rao.vaultBalanceOf(msg.sender),5000, "The sender didn't receive 5000 RAO in the vault");
+    }
+
+    function testTimeSealRemitForAfterExpiry() public {
+        RAOToken rao = new RAOToken(this);
+        rao.transfer(proxyOwnerAddress,400);
+        // Assert.equal(rao.balanceOf(msg.sender))
+        Assert.equal(rao.balanceOf(proxyOwnerAddress),400, "The proxy address doesnt have 400 RAO in it");
+        
+        rao.transferToVault(proxyOwnerAddress,5000);
+        rao.resetTimeSeal();
+        rao.remitFor(proxyOwnerAddress);
+        Assert.equal(rao.balanceOf(proxyOwnerAddress),5400,"The proxy address didnt receive 5000 RAO from the vault");
+    }
+
+
+
+
 }
