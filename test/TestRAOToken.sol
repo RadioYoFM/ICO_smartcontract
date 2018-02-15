@@ -44,12 +44,25 @@ contract TestRAOToken {
         RAOToken rao = new RAOToken(this);
         rao.transfer(proxyOwnerAddress,400);
         // Assert.equal(rao.balanceOf(msg.sender))
+        Assert.equal(rao.balanceOf(proxyOwnerAddress),400, "The proxy address doesnt have 400 RAO in it");        
+        rao.transferToVault(proxyOwnerAddress,5000);
         Assert.equal(rao.balanceOf(proxyOwnerAddress),400, "The proxy address doesnt have 400 RAO in it");
         
-        rao.transferToVault(proxyOwnerAddress,5000);
         rao.resetTimeSeal();
         rao.remitFor(proxyOwnerAddress);
         Assert.equal(rao.balanceOf(proxyOwnerAddress),5400,"The proxy address didnt receive 5000 RAO from the vault");
+    }
+
+    function testTimeSealRemitAfterExpiry() public {
+         RAOToken rao = new RAOToken(proxyOwnerAddress);
+        // Assert.equal(rao.balanceOf(msg.sender))
+        Assert.equal(rao.balanceOf(this),0, "The proxy address doesnt have 0 RAO in it");
+        
+        rao.transferToVault(this,5000);
+        Assert.equal(rao.balanceOf(this),0, "The proxy address doesnt have 0 RAO in it");        
+        rao.resetTimeSeal();
+        rao.remit();
+        Assert.equal(rao.balanceOf(this),5000,"The proxy address didnt receive 5000 RAO from the vault");
     }
 
 
