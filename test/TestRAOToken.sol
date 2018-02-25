@@ -65,6 +65,16 @@ contract TestRAOToken {
         Assert.equal(rao.balanceOf(this),5000,"The proxy address didnt receive 5000 RAO from the vault");
     }
 
+    function testWhiteListingByOwner() public {
+        RAOToken rao = new RAOToken(proxyOwnerAddress);
+        rao.setWhitelistStatus(proxyOwnerAddress,true);
+        Assert.equal(rao.whitelisted(proxyOwnerAddress),true, "The proxy address should be whitelisted");        
+        
+        rao.setWhitelistStatus(this,true);
+        Assert.equal(rao.whitelisted(this),true, "The owner address should be whitelisted");        
+        
+    }
+
 
 
 

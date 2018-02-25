@@ -91,6 +91,9 @@ contract RAOToken is Ownable, ERC20 {
     // Balances for each account
     mapping (address => uint256) balances;
 
+    // whitelisting users
+    mapping (address => bool) whitelist;
+
     // time seal for upper management
     mapping (address => uint256) vault;
     
@@ -112,11 +115,7 @@ contract RAOToken is Ownable, ERC20 {
     // how many token units a buyer get in base unit 
     uint256 public RATE;
 
-    uint256 public minContribAmount = 0.01 ether;
     uint256 public kycLevel = 15 ether;
-    uint256 minCapBonus1 = 0.16 ether;
-    uint256 minCapBonus2 = 33 ether;
-    uint256 minCapBonus3 = 83 ether;
 
 
     uint256 public hardCap = 200000000e18;
@@ -172,7 +171,7 @@ contract RAOToken is Ownable, ERC20 {
         sealdate = startTime + 180 days;
 
         // for now the token sale will run for 30 days
-        endTime = startTime + 30 days;
+        endTime = startTime + 60 days;
         balances[multisig] = _totalSupply;
 
         owner = msg.sender;
@@ -189,11 +188,16 @@ contract RAOToken is Ownable, ERC20 {
         tokensale(msg.sender);
     }
 
+    function whitelisted(address user) public constant returns (bool) {
+        return whitelist[user];
+    }
+
     // @notice tokensale
     // @param recipient The address of the recipient
     // @return the transaction address and send the event as Transfer
-    function tokensale(address recipient) public canMint isActive saleIsOpen payable {
+    function tokensale(address recipient) internal canMint isActive saleIsOpen {
         require(recipient != 0x0);
+        require(whitelisted(recipient));
         
         uint256 weiAmount = msg.value;
         uint256 numberRaoToken = weiAmount.mul(RATE).div(1 ether);
@@ -208,13 +212,13 @@ contract RAOToken is Ownable, ERC20 {
 
          if (weiAmount < kycLevel) {
             updateBalances(recipient, numberRaoToken);
-            forwardFunds();  
          } else {
             balancesWaitingKYC[recipient] = balancesWaitingKYC[recipient].add(numberRaoToken); 
-            forwardFunds();  
          }
+        forwardFunds();
+        // a sender can only buy once per white list entry
+        setWhitelistStatus(recipient, false);
          
-        
     }
     
     function updateBalances(address receiver, uint256 tokens) internal {
@@ -233,13 +237,32 @@ contract RAOToken is Ownable, ERC20 {
         multisig.transfer(msg.value);
     }
 
+    function setWhitelistStatus(address user, bool status) public returns (bool) {
+        if (status == true) {
+            //only owner can set whitelist
+            require(msg.sender == owner);
+            whitelist[user] = true;        
+        } else {
+            // owner and the user themselves can remove them selves from whitelist
+            require(msg.sender == owner || msg.sender == user);
+            whitelist[user] = false;
+        }
+        return whitelist[user];
+    }
+
+    function setWhitelistForBulk(address[] listAddresses, bool status) public onlyOwner {
+        for (uint256 i = 0; i < listAddresses.length; i++) {
+            address client = listAddresses[i];
+            whitelist[client] = status;
+        }
+    }
+    
     // @return true if the transaction can buy tokens
     function validPurchase() internal constant returns (bool) {
         bool withinPeriod = getNow() >= startTime && getNow() <= endTime;
         bool nonZeroPurchase = msg.value != 0;
-        bool minContribution = minContribAmount <= msg.value;
         bool notReachedHardCap = hardCap >= totalNumberTokenSold;
-        return withinPeriod && nonZeroPurchase && minContribution && notReachedHardCap;
+        return withinPeriod && nonZeroPurchase && notReachedHardCap;
     }
 
     // @return true if crowdsale current lot event has ended
