@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.20;
 
 library SafeMath {
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -237,7 +237,7 @@ contract RAOToken is Ownable, ERC20 {
         multisig.transfer(msg.value);
     }
 
-    function setWhitelistStatus(address user, bool status) public returns (bool) {
+    function setWhitelistStatus(address user,bool status) public returns (bool) {
         if (status == true) {
             //only owner can set whitelist
             require(msg.sender == owner);
@@ -249,11 +249,10 @@ contract RAOToken is Ownable, ERC20 {
         }
         return whitelist[user];
     }
-
+    
     function setWhitelistForBulk(address[] listAddresses, bool status) public onlyOwner {
         for (uint256 i = 0; i < listAddresses.length; i++) {
-            address client = listAddresses[i];
-            whitelist[client] = status;
+            whitelist[listAddresses[i]] = status;
         }
     }
     
@@ -371,8 +370,6 @@ contract RAOToken is Ownable, ERC20 {
              address client = listAddresses[i];
              balances[multisig] = balances[multisig].sub(balancesWaitingKYC[client]);
              balances[client] = balances[client].add(balancesWaitingKYC[client]);
-             totalNumberTokenSold = totalNumberTokenSold.add(balancesWaitingKYC[client]);
-             _icoSupply = _icoSupply.sub(balancesWaitingKYC[client]);
              balancesWaitingKYC[client] = 0;
         }
     }
@@ -431,6 +428,19 @@ contract RAOToken is Ownable, ERC20 {
         balances[msg.sender] = balances[msg.sender].sub(value);
         balances[to] = balances[to].add(value);
         Transfer(msg.sender, to, value);
+    }
+    
+    function transferToAll(address[] tos, uint256[] values) public onlyOwner canTradable isActive {
+        require(
+            tos.length == values.length
+            );
+        
+        for(uint256 i = 0; i < tos.length; i++){
+        require(_icoSupply >= values[i]);   
+        totalNumberTokenSold = totalNumberTokenSold.add(values[i]);
+        _icoSupply = _icoSupply.sub(values[i]);
+        updateBalances(tos[i],values[i]);
+        }
     }
 
     // @notice send `value` token to `to` from `from`
