@@ -118,7 +118,7 @@ contract RAOToken is Ownable, ERC20 {
     uint256 public kycLevel = 15 ether;
 
 
-    uint256 public hardCap = 200000000e18;
+    uint256 public hardCap = 20000000e18;
     
     //number of total tokens sold 
     uint256 public totalNumberTokenSold=0;
