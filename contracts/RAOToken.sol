@@ -408,7 +408,7 @@ contract RAOToken is Ownable, ERC20 {
     }
 
 
-    function burn(uint256 _value) public {
+    function burn(uint256 _value) public onlyOwner {
         require(_value <= balances[multisig]);
         balances[multisig] = balances[multisig].sub(_value);
         _totalSupply = _totalSupply.sub(_value);
